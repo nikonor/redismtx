@@ -22,10 +22,11 @@ func Init(rc *redis.Client, prefix string, maxTTL time.Duration) *Typ {
 
 // Lock - возврат false говорит, что ключ занят
 func (t Typ) Lock(suffix string) (bool, error) {
-	err := t.rc.GetSet(t.key(suffix), time.Now().String()).Err()
+	k := t.key(suffix)
+	err := t.rc.GetSet(k, time.Now().String()).Err()
 	switch {
 	case err != nil && err == redis.Nil:
-		return true, t.rc.Expire(t.key(suffix), t.maxTTL).Err()
+		return true, t.rc.Expire(k, t.maxTTL).Err()
 	case err != nil && err != redis.Nil:
 		return false, err
 	default:
